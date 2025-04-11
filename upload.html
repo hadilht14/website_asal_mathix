@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Data - Forest Classification Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+    
+    :root {
+      --space-blue: #0B3D91;
+      --earth-green: #44AF69;
+      --cosmic-black: #101820;
+      --nasa-gold: #FFD700;
+      --alert-red: #FC3D21;
+      --text-white: #FFFFFF;
+      --light-blue: #A7D5F2;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--cosmic-black);
+      color: var(--text-white);
+      overflow-x: hidden;
+    }
+    
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+    
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 4s infinite;
+    }
+    
+    @keyframes twinkle {
+      0% { opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { opacity: 0.3; }
+    }
+    
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 3rem;
+      background: rgba(11, 61, 145, 0.9);
+      backdrop-filter: blur(10px);
+      position: fixed;
+      width: 100%;
+      z-index: 100;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .logo-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: conic-gradient(var(--nasa-gold), var(--alert-red), var(--nasa-gold));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: rotate 20s linear infinite;
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .logo-inner {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--space-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-white);
+      font-weight: bold;
+      font-size: 14px;
+    }
+    
+    .logo h1 {
+      font-size: 1.2rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+    
+    nav ul {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+    
+    nav a {
+      color: var(--text-white);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      padding: 0.5rem 0;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--nasa-gold);
+      transition: width 0.3s ease;
+    }
+    
+    nav a:hover {
+      color: var(--nasa-gold);
+    }
+    
+    nav a:hover::after {
+      width: 100%;
+    }
+    
+    .upload-container {
+      padding: 180px 3rem 3rem;
+      max-width: 1000px;
+      margin: 0 auto;
+      position: relative;
+    }
+    
+    .upload-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .upload-title {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--nasa-gold);
+      position: relative;
+      display: inline-block;
+    }
+    
+    .upload-title::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 25%;
+      width: 50%;
+      height: 3px;
+      background: var(--nasa-gold);
+    }
+    
+    .upload-subtitle {
+      font-size: 1.1rem;
+      color: var(--light-blue);
+      max-width: 700px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    
+    .upload-area {
+      background: rgba(16, 24, 32, 0.7);
+      border: 2px dashed var(--nasa-gold);
+      border-radius: 15px;
+      padding: 3rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .upload-area:hover {
+      border-color: var(--light-blue);
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+    }
+    
+    .upload-icon {
+      font-size: 3rem;
+      color: var(--nasa-gold);
+      margin-bottom: 1.5rem;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+      100% { transform: translateY(0px); }
+    }
+    
+    .upload-text h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .upload-text p {
+      color: var(--light-blue);
+      margin-bottom: 1.5rem;
+    }
+    
+    .file-input {
+      display: none;
+    }
+    
+    .upload-btn {
+      background: var(--space-blue);
+      color: var(--text-white);
+      padding: 0.8rem 2rem;
+      border-radius: 50px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      border: 2px solid var(--nasa-gold);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .upload-btn:hover {
+      background: var(--nasa-gold);
+      color: var(--cosmic-black);
+      box-shadow: 0 0 15px var(--nasa-gold);
+    }
+    
+    .upload-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      z-index: -1;
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .upload-btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+    
+    .file-list {
+      background: rgba(16, 24, 32, 0.7);
+      border-radius: 15px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .file-item {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      animation: slideIn 0.5s ease forwards;
+    }
+    
+    @keyframes slideIn {
+      from { transform: translateX(-20px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .file-icon {
+      margin-right: 1rem;
+      color: var(--nasa-gold);
+    }
+    
+    .file-info {
+      flex: 1;
+    }
+    
+    .file-name {
+      font-weight: 500;
+      margin-bottom: 0.3rem;
+    }
+    
+    .file-size {
+      font-size: 0.8rem;
+      color: var(--light-blue);
+    }
+    
+    .file-status {
+      color: var(--nasa-gold);
+      font-size: 0.9rem;
+    }
+    
+    .progress-container {
+      margin: 2rem 0;
+      display: none;
+    }
+    
+    .progress-bar {
+      height: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+    
+    .progress {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--nasa-gold), var(--rocket-orange));
+      transition: width 0.3s ease;
+    }
+    
+    .progress-text {
+      text-align: center;
+      color: var(--light-blue);
+    }
+    
+    .process-btn {
+      background: var(--earth-green);
+      color: var(--text-white);
+      padding: 1rem 2.5rem;
+      border-radius: 50px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0 auto;
+      display: none;
+    }
+    
+    .process-btn:hover {
+      background: var(--nasa-gold);
+      color: var(--cosmic-black);
+      box-shadow: 0 0 15px var(--nasa-gold);
+    }
+    
+    .process-btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      z-index: -1;
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .process-btn:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+    
+    .orbit {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: -1;
+    }
+    
+    .orbit-outer {
+      width: 800px;
+      height: 800px;
+      animation: orbit-rotate 40s linear infinite;
+    }
+    
+    .orbit-middle {
+      width: 600px;
+      height: 600px;
+      animation: orbit-rotate 30s linear infinite reverse;
+    }
+    
+    .orbit-inner {
+      width: 400px;
+      height: 400px;
+      animation: orbit-rotate 20s linear infinite;
+    }
+    
+    @keyframes orbit-rotate {
+      from { transform: translate(-50%, -50%) rotate(0deg); }
+      to { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    
+    .satellite {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: var(--nasa-gold);
+      border-radius: 50%;
+      box-shadow: 0 0 15px var(--nasa-gold);
+    }
+    
+    .satellite-outer {
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: satellite-pulse 4s infinite;
+    }
+    
+    .satellite-middle {
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: satellite-pulse 4s infinite 2s;
+    }
+    
+    .satellite-inner {
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      animation: satellite-pulse 4s infinite 1s;
+    }
+    
+    @keyframes satellite-pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+      header {
+        padding: 1rem;
+      }
+      
+      .logo h1 {
+        font-size: 1rem;
+      }
+      
+      nav ul {
+        gap: 1rem;
+      }
+      
+      .upload-container {
+        padding: 150px 1rem 2rem;
+      }
+      
+      .upload-title {
+        font-size: 2rem;
+      }
+      
+      .upload-area {
+        padding: 2rem 1rem;
+      }
+      
+      .upload-btn, .process-btn {
+        padding: 0.8rem 1.5rem;
+      }
+      .logo-container{
+         height: 20px;  /* Super small size (adjust as needed) */
+         width: auto;   /* Preserves proportions */
+  opacity: 0.9;  /* Optional: Slight transparency */
+}
+    }
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+  
+  <header>
+    <div class="logo">
+      <div class="logo-container" style="height: 30px; width: auto; opacity: 0.9;">
+        <img src="logo.png" alt="Algerian Space Logo" class="nav-logo" style="height: 100%; width: auto;">
+      </div>
+      <h1>FOREST CLASSIFIER</h1>
+    </div>
+    
+    <nav>
+      <ul>
+        <li><a href="animatedhomepage.html">Home</a></li>
+        <li><a href="upload.html" class="active">Upload</a></li>
+        <li><a href="analysis.html">Analysis</a></li>
+        <li><a href="visualization.html">Results</a></li>
+      </ul>
+    </nav>
+  </header>
+  
+  <div class="upload-container">
+    <div class="orbit orbit-outer">
+      <div class="satellite satellite-outer"></div>
+    </div>
+    <div class="orbit orbit-middle">
+      <div class="satellite satellite-middle"></div>
+    </div>
+    <div class="orbit orbit-inner">
+      <div class="satellite satellite-inner"></div>
+    </div>
+    
+    <div class="upload-header">
+      <h1 class="upload-title">Upload Satellite Data</h1>
+      <p class="upload-subtitle">Upload your satellite imagery and labeled data for precise forest classification and analysis</p>
+    </div>
+    
+    <div class="upload-area" id="dropZone">
+      <div class="upload-icon">
+        <i class="fas fa-cloud-upload-alt"></i>
+      </div>
+      <div class="upload-text">
+        <h3>Drag & Drop Files Here</h3>
+        <p>Supported formats: TIFF, GeoTIFF, JPEG, PNG</p>
+      </div>
+      <input type="file" id="fileInput" class="file-input" multiple accept=".tif,.tiff,.geotiff,.jpg,.jpeg,.png">
+      <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+        <i class="fas fa-folder-open"></i> Select Files
+      </button>
+    </div>
+    
+    <div class="file-list" id="fileList"></div>
+    
+    <div class="progress-container" id="progressContainer">
+      <div class="progress-bar">
+        <div class="progress" id="progressBar"></div>
+      </div>
+      <p class="progress-text" id="progressText">Uploading... 0%</p>
+    </div>
+    
+    <div style="text-align: center;">
+      <button class="process-btn" id="processBtn">
+        <i class="fas fa-cogs"></i> Process Data
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Create stars
+    const starsContainer = document.getElementById('stars');
+    
+    function createStars(count) {
+      for (let i = 0; i < count; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star');
+        
+        // Random position
+        const x = Math.floor(Math.random() * window.innerWidth);
+        const y = Math.floor(Math.random() * window.innerHeight);
+        
+        star.style.left = `${x}px`;
+        star.style.top = `${y}px`;
+        
+        // Random size
+        const size = Math.random() * 2;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        
+        // Random opacity
+        const opacity = Math.random() * 0.8 + 0.2;
+        star.style.opacity = opacity;
+        
+        // Random animation delay
+        const delay = Math.random() * 5;
+        star.style.animation = `twinkle 4s ${delay}s infinite`;
+        
+        starsContainer.appendChild(star);
+      }
+    }
+    
+    createStars(150);
+    
+    // File upload handling
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const processBtn = document.getElementById('processBtn');
+    const progressBar = document.getElementById('progressBar');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressText = document.getElementById('progressText');
+    
+    // Highlight drop zone when dragging over
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = 'var(--light-blue)';
+      dropZone.style.boxShadow = '0 0 20px rgba(167, 213, 242, 0.5)';
+    });
+    
+    dropZone.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = 'var(--nasa-gold)';
+      dropZone.style.boxShadow = 'none';
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = 'var(--nasa-gold)';
+      dropZone.style.boxShadow = 'none';
+      handleFiles(e.dataTransfer.files);
+    });
+    
+    fileInput.addEventListener('change', (e) => {
+      handleFiles(e.target.files);
+    });
+    
+    function handleFiles(files) {
+      if (files.length === 0) return;
+      
+      fileList.innerHTML = '';
+      
+      Array.from(files).forEach((file, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
+        fileItem.style.animationDelay = `${index * 0.1}s`;
+        
+        const fileType = file.name.split('.').pop().toUpperCase();
+        const fileSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+        
+        fileItem.innerHTML = `
+          <div class="file-icon">
+            <i class="fas fa-file-image"></i>
+          </div>
+          <div class="file-info">
+            <div class="file-name">${file.name}</div>
+            <div class="file-size">${fileSize} • ${fileType}</div>
+          </div>
+          <div class="file-status">Ready</div>
+        `;
+        
+        fileList.appendChild(fileItem);
+      });
+      
+      processBtn.style.display = 'inline-flex';
+      simulateUpload();
+    }
+    
+    function simulateUpload() {
+      progressContainer.style.display = 'block';
+      progressBar.style.width = '0%';
+      progressText.textContent = 'Uploading... 0%';
+      
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 5 + 1;
+        if (progress > 100) progress = 100;
+        
+        progressBar.style.width = `${progress}%`;
+        progressText.textContent = `Uploading... ${Math.floor(progress)}%`;
+        
+        // Change color as progress increases
+        if (progress < 30) {
+          progressBar.style.background = 'linear-gradient(90deg, var(--nasa-gold), var(--rocket-orange))';
+        } else if (progress < 70) {
+          progressBar.style.background = 'linear-gradient(90deg, var(--rocket-orange), var(--light-blue))';
+        } else {
+          progressBar.style.background = 'linear-gradient(90deg, var(--light-blue), var(--earth-green))';
+        }
+        
+        if (progress >= 100) {
+          clearInterval(interval);
+          progressText.innerHTML = '<i class="fas fa-check-circle"></i> Upload Complete!';
+          processBtn.disabled = false;
+          
+          // Add confetti celebration
+          createConfetti();
+        }
+      }, 100);
+    }
+    
+    function createConfetti() {
+      const colors = ['var(--nasa-gold)', 'var(--light-blue)', 'var(--earth-green)', 'var(--rocket-orange)'];
+      
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.style.position = 'fixed';
+        confetti.style.width = '10px';
+        confetti.style.height = '10px';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.borderRadius = '50%';
+        confetti.style.left = `${Math.random() * 100}%`;
+        confetti.style.top = '-10px';
+        confetti.style.zIndex = '1000';
+        confetti.style.transform = 'rotate(0deg)';
+        
+        document.body.appendChild(confetti);
+        
+        // Animate confetti
+        const animation = confetti.animate([
+          { top: '-10px', opacity: 1, transform: 'rotate(0deg)' },
+          { top: `${Math.random() * 100 + 50}%`, opacity: 0.5, transform: 'rotate(360deg)' }
+        ], {
+          duration: Math.random() * 3000 + 2000,
+          easing: 'cubic-bezier(0.1, 0.8, 0.9, 1)'
+        });
+        
+        animation.onfinish = () => confetti.remove();
+      }
+    }
+    
+    processBtn.addEventListener('click', () => {
+      // Add processing animation
+      processBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+      processBtn.disabled = true;
+      
+      // Simulate processing delay
+      setTimeout(() => {
+        window.location.href = 'analysis.html';
+      }, 2000);
+    });
+    
+    // Add responsive navigation for mobile
+    const navToggle = document.createElement('button');
+    navToggle.innerHTML = '☰';
+    navToggle.style.background = 'transparent';
+    navToggle.style.border = 'none';
+    navToggle.style.color = 'white';
+    navToggle.style.fontSize = '1.5rem';
+    navToggle.style.cursor = 'pointer';
+    navToggle.style.display = 'none';
+    navToggle.style.position = 'absolute';
+    navToggle.style.right = '1rem';
+    navToggle.style.top = '1rem';
+    
+    const nav = document.querySelector('nav');
+    document.querySelector('header').appendChild(navToggle);
+    
+    navToggle.addEventListener('click', () => {
+      nav.style.display = nav.style.display === 'none' ? 'block' : 'none';
+    });
+    
+    function checkScreenSize() {
+      if (window.innerWidth <= 768) {
+        navToggle.style.display = 'block';
+        nav.style.display = 'none';
+      } else {
+        navToggle.style.display = 'none';
+        nav.style.display = 'block';
+      }
+    }
+    
+    window.addEventListener('resize', checkScreenSize);
+    checkScreenSize();
+  </script>
+</body>
+</html>

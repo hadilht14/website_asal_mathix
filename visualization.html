@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forest Classification Visualization</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+    
+    :root {
+      --space-blue: #0B3D91;
+      --earth-green: #44AF69;
+      --cosmic-black: #101820;
+      --nasa-gold: #FFD700;
+      --alert-red: #FC3D21;
+      --text-white: #FFFFFF;
+      --light-blue: #A7D5F2;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--cosmic-black);
+      color: var(--text-white);
+      overflow-x: hidden;
+    }
+    
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+    
+    .stars::before {
+      content: '';
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: white;
+      box-shadow: 0 0 10px 2px rgba(255,255,255,0.7);
+      border-radius: 50%;
+      animation: twinkle 4s infinite;
+    }
+    
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+    }
+    
+    @keyframes twinkle {
+      0% { opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { opacity: 0.3; }
+    }
+    
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 3rem;
+      background: rgba(11, 61, 145, 0.9);
+      backdrop-filter: blur(10px);
+      position: fixed;
+      width: 100%;
+      z-index: 100;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .logo-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: conic-gradient(var(--nasa-gold), var(--alert-red), var(--nasa-gold));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: rotate 20s linear infinite;
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .logo-inner {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--space-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-white);
+      font-weight: bold;
+      font-size: 14px;
+    }
+    
+    .logo h1 {
+      font-size: 1.2rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+    
+    nav ul {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+    
+    nav a {
+      color: var(--text-white);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      padding: 0.5rem 0;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--nasa-gold);
+      transition: width 0.3s ease;
+    }
+    
+    nav a:hover {
+      color: var(--nasa-gold);
+    }
+    
+    nav a:hover::after {
+      width: 100%;
+    }
+    
+    .visualization-container {
+      padding: 8rem 3rem 3rem;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    .section-title {
+      text-align: center;
+      margin-bottom: 3rem;
+      font-size: 2rem;
+      position: relative;
+      display: inline-block;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 25%;
+      width: 50%;
+      height: 3px;
+      background: var(--nasa-gold);
+    }
+    
+    .map-container {
+      position: relative;
+      width: 100%;
+      height: 600px;
+      background-color: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    
+    #satellite-map {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .map-overlay {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(16, 24, 32, 0.8);
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--nasa-gold);
+      z-index: 1000;
+    }
+    
+    .map-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      gap: 1rem;
+    }
+    
+    .control-panel {
+      background: rgba(16, 24, 32, 0.7);
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      flex: 1;
+    }
+    
+    .control-title {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--nasa-gold);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .control-icon {
+      width: 30px;
+      height: 30px;
+      background: var(--space-blue);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+    
+    .layer-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    
+    .layer-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.8rem;
+    }
+    
+    .layer-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+    
+    .layer-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: var(--nasa-gold);
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+    
+    .layer-label {
+      font-size: 0.9rem;
+    }
+    
+    .opacity-control {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+    
+    .timeline-container {
+      margin-top: 2rem;
+    }
+    
+    .timeline {
+      width: 100%;
+      height: 60px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      position: relative;
+      margin-top: 0.5rem;
+    }
+    
+    .timeline-handle {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: var(--nasa-gold);
+      border-radius: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      z-index: 2;
+    }
+    
+    .timeline-progress {
+      position: absolute;
+      height: 100%;
+      background: linear-gradient(to right, var(--space-blue), var(--nasa-gold));
+      border-radius: 4px;
+      left: 0;
+    }
+    
+    .timeline-marks {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .timeline-mark {
+      width: 2px;
+      height: 20px;
+      background: rgba(255,255,255,0.3);
+      margin-top: 20px;
+    }
+    
+    .timeline-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--light-blue);
+    }
+    
+    .visualization-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      background: rgba(16, 24, 32, 0.7);
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      border-color: var(--nasa-gold);
+    }
+    
+    .stat-title {
+      font-size: 0.9rem;
+      color: var(--light-blue);
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 500;
+      color: var(--nasa-gold);
+    }
+    
+    .stat-change {
+      font-size: 0.8rem;
+      margin-top: 0.3rem;
+    }
+    
+    .positive {
+      color: var(--earth-green);
+    }
+    
+    .negative {
+      color: var(--alert-red);
+    }
+    
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+    }
+    
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 4px;
+    }
+    
+    .color-forest {
+      background: var(--earth-green);
+    }
+    
+    .color-nonforest {
+      background: var(--alert-red);
+    }
+    
+    .color-density-1 { background: #00441b; }
+    .color-density-2 { background: #006d2c; }
+    .color-density-3 { background: #238b45; }
+    .color-density-4 { background: #41ab5d; }
+    .color-density-5 { background: #74c476; }
+    .color-density-6 { background: #a1d99b; }
+    .color-density-7 { background: #c7e9c0; }
+    .color-density-8 { background: #e5f5e0; }
+    
+    .color-uncertainty-1 { background: #67000d; }
+    .color-uncertainty-2 { background: #a50f15; }
+    .color-uncertainty-3 { background: #cb181d; }
+    .color-uncertainty-4 { background: #ef3b2c; }
+    .color-uncertainty-5 { background: #fb6a4a; }
+    .color-uncertainty-6 { background: #fc9272; }
+    .color-uncertainty-7 { background: #fcbba1; }
+    .color-uncertainty-8 { background: #fee5d9; }
+    
+    .visualization-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    
+    .action-button {
+      padding: 0.8rem 1.5rem;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .action-primary {
+      background: var(--space-blue);
+      color: var(--text-white);
+      border: 1px solid var(--nasa-gold);
+    }
+    
+    .action-secondary {
+      background: transparent;
+      color: var(--text-white);
+      border: 1px solid var(--light-blue);
+    }
+    
+    .action-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .action-primary:hover {
+      box-shadow: 0 0 15px var(--nasa-gold);
+    }
+    
+    .action-secondary:hover {
+      box-shadow: 0 0 15px var(--light-blue);
+    }
+    
+    footer {
+      background: var(--space-blue);
+      padding: 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .footer-orbit {
+      position: absolute;
+      width: 1200px;
+      height: 1200px;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    
+    .footer-content {
+      position: relative;
+      z-index: 10;
+    }
+    
+    .footer-logo {
+      margin-bottom: 2rem;
+    }
+    
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .footer-link {
+      color: var(--light-blue);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.3s ease;
+    }
+    
+    .footer-link:hover {
+      color: var(--nasa-gold);
+    }
+    
+    .footer-credit {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.5);
+    }
+    
+    @media (max-width: 768px) {
+      header {
+        padding: 1rem;
+      }
+      
+      .logo h1 {
+        font-size: 1rem;
+      }
+      
+      nav ul {
+        gap: 1rem;
+      }
+      
+      .visualization-container {
+        padding: 6rem 1rem 2rem;
+      }
+      
+      .map-container {
+        height: 400px;
+      }
+      
+      .map-controls {
+        flex-direction: column;
+      }
+      
+      .layer-controls {
+        grid-template-columns: 1fr;
+      }
+      
+      .visualization-stats {
+        grid-template-columns: 1fr;
+      }
+      
+      .visualization-actions {
+        flex-direction: column;
+      }
+      
+      .action-button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+    
+    /* Animation classes */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.6s ease forwards;
+    }
+    
+    .delay-1 { animation-delay: 0.2s; }
+    .delay-2 { animation-delay: 0.4s; }
+    .delay-3 { animation-delay: 0.6s; }
+    .delay-4 { animation-delay: 0.8s; }
+    
+    /* Spinner styles */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: var(--nasa-gold);
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Scan line animation */
+    .scan-line {
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(to right, transparent, var(--nasa-gold), transparent);
+      animation: scan 3s linear infinite;
+      z-index: 3;
+    }
+    
+    @keyframes scan {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+    .logo-container{
+         height: 20px;  /* Super small size (adjust as needed) */
+         width: auto;   /* Preserves proportions */
+  opacity: 0.9;  /* Optional: Slight transparency */
+}
+  </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+  
+  <header>
+    <div class="logo">
+      <div class="logo-container" style="height: 30px; width: auto; opacity: 0.9;">
+        <img src="logo.png" alt="Algerian Space Logo" class="nav-logo" style="height: 100%; width: auto;">
+      </div>
+      <h1>FOREST CLASSIFIER</h1>
+    </div>
+    
+    <nav>
+      <ul>
+        <li><a href="animatedhomepage.html">Home</a></li>
+        <li><a href="upload.html">Upload</a></li>
+        <li><a href="analysis.html">Analysis</a></li>
+        <li><a href="visualization.html" class="active">Results</a></li>
+      </ul>
+    </nav>
+  </header>
+  
+  <main class="visualization-container">
+    <h1 class="section-title">Interactive Visualization</h1>
+    
+    <div class="visualization-stats">
+      <div class="stat-card fade-in">
+        <div class="stat-title">Forest Coverage</div>
+        <div class="stat-value">64.2%</div>
+        <div class="stat-change positive">+2.4% since 2024</div>
+      </div>
+      
+      <div class="stat-card fade-in delay-1">
+        <div class="stat-title">Mean Density</div>
+        <div class="stat-value">42.6%</div>
+        <div class="stat-change negative">-1.2% since 2024</div>
+      </div>
+      
+      <div class="stat-card fade-in delay-2">
+        <div class="stat-title">Uncertainty</div>
+        <div class="stat-value">22.4%</div>
+        <div class="stat-change positive">-3.1% since 2024</div>
+      </div>
+      
+      <div class="stat-card fade-in delay-3">
+        <div class="stat-title">Area Analyzed</div>
+        <div class="stat-value">1,024 km²</div>
+        <div class="stat-change positive">+256 km²</div>
+      </div>
+    </div>
+    
+    <div class="map-container">
+      <div id="satellite-map"></div>
+      <div class="scan-line"></div>
+      <div class="map-overlay">
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-color color-forest"></div>
+            <span>Forest</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color color-nonforest"></div>
+            <span>Non-Forest</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="map-controls">
+      <div class="control-panel fade-in">
+        <h3 class="control-title">
+          <div class="control-icon">1</div>
+          Layer Controls
+        </h3>
+        <div class="layer-controls">
+          <div class="layer-item">
+            <label class="layer-switch">
+              <input type="checkbox" checked>
+              <span class="slider"></span>
+            </label>
+            <span class="layer-label">Classification</span>
+          </div>
+          
+          <div class="layer-item">
+            <label class="layer-switch">
+              <input type="checkbox">
+              <span class="slider"></span>
+            </label>
+            <span class="layer-label">Density</span>
+          </div>
+          
+          <div class="layer-item">
+            <label class="layer-switch">
+              <input type="checkbox">
+              <span class="slider"></span>
+            </label>
+            <span class="layer-label">Uncertainty</span>
+          </div>
+          
+          <div class="layer-item">
+            <label class="layer-switch">
+              <input type="checkbox" checked>
+              <span class="slider"></span>
+            </label>
+            <span class="layer-label">Satellite</span>
+          </div>
+        </div>
+        
+        <div class="timeline-container">
+          <h3 class="control-title">
+            <div class="control-icon">2</div>
+            Time Series
+          </h3>
+          <div class="timeline">
+            <div class="timeline-progress" style="width: 75%;"></div>
+            <div class="timeline-handle" style="left: 75%;"></div>
+            <div class="timeline-marks">
+              <div class="timeline-mark" style="margin-left: 0%;"></div>
+              <div class="timeline-mark" style="margin-left: 25%;"></div>
+              <div class="timeline-mark" style="margin-left: 50%;"></div>
+              <div class="timeline-mark" style="margin-left: 75%;"></div>
+              <div class="timeline-mark" style="margin-left: 100%;"></div>
+            </div>
+          </div>
+          <div class="timeline-labels">
+            <span>2022</span>
+            <span>2023</span>
+            <span>2024</span>
+            <span>2025</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="control-panel fade-in delay-1">
+        <h3 class="control-title">
+          <div class="control-icon">3</div>
+          Legend
+        </h3>
+        
+        <h4>Density Scale</h4>
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-color color-density-1"></div>
+            <span>0-10%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color color-density-2"></div>
+            <span>10-20%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color color-density-3"></div>
+            <span>20-30%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color color-density-4"></div>
+            <span>30-40%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color color-density-5"></div>
+            <span>40-50%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color color-density-6"></div>
+            <span>50-60%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color color-density-7"></div>
+            <span>60-70%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color color-density-8"></div>
+            <span>70-100%</span>
+          </div>
+        </div>
+        
+        <h4 style="margin-top: 1rem;">Uncertainty Scale</h4>
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-color color-uncertainty-1"></div>
+            <span>0-10%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color color-uncertainty-2"></div>
+            <span>10-20%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color color-uncertainty-3"></div>
+            <span>20-30%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color color-uncertainty-4"></div>
+            <span>30-40%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color color-uncertainty-5"></div>
+            <span>40-50%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color color-uncertainty-6"></div>
+            <span>50-60%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color color-uncertainty-7"></div>
+            <span>60-70%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color color-uncertainty-8"></div>
+            <span>70-100%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="visualization-actions">
+      <button class="action-button action-secondary" id="export-image">
+        Export Image
+      </button>
+      <button class="action-button action-primary" id="export-data">
+        <span class="spinner" id="export-spinner" style="display: none;"></span>
+        Export Data
+      </button>
+    </div>
+  </main>
+  
+  <footer>
+    <div class="footer-orbit"></div>
+    
+    <div class="footer-content">
+      <div class="footer-logo">
+        <div class="logo-circle">
+          <div class="logo-inner">ASA</div>
+        </div>
+      </div>
+      
+      <div class="footer-links">
+        <a href="#" class="footer-link">Privacy Policy</a>
+        <a href="#" class="footer-link">Terms of Use</a>
+        <a href="#" class="footer-link">Contact</a>
+        <a href="#" class="footer-link">Documentation</a>
+      </div>
+      
+      <p class="footer-credit"> 2025 Algerian Space Agency. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script>
+    // Create stars
+    const starsContainer = document.getElementById('stars');
+    
+    function createStars(count) {
+      for (let i = 0; i < count; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star');
+        
+        // Random position
+        const x = Math.floor(Math.random() * window.innerWidth);
+        const y = Math.floor(Math.random() * window.innerHeight);
+        
+        star.style.left = `${x}px`;
+        star.style.top = `${y}px`;
+        
+        // Random size
+        const size = Math.random() * 2;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        
+        // Random opacity
+        const opacity = Math.random() * 0.8 + 0.2;
+        star.style.opacity = opacity;
+        
+        // Random animation delay
+        const delay = Math.random() * 5;
+        star.style.animation = `twinkle 4s ${delay}s infinite`;
+        
+        starsContainer.appendChild(star);
+      }
+    }
+    
+    createStars(150);
+    
+    // Initialize map (simplified version - in a real app you'd add actual layers)
+    const map = L.map('satellite-map').setView([36.7525, 3.042], 10);
+    
+    // Add a simple tile layer (in a real app, you'd use your own tile server)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    
+    // Simulate adding a classification layer
+    function addClassificationLayer() {
+      // This would be your actual classification layer in a real app
+      const bounds = map.getBounds();
+      const southWest = bounds.getSouthWest();
+      const northEast = bounds.getNorthEast();
+      
+      // Create a simple rectangle to simulate forest cover
+      const forestArea = L.rectangle([
+        [southWest.lat + (northEast.lat - southWest.lat) * 0.2, 
+         southWest.lng + (northEast.lng - southWest.lng) * 0.2],
+        [southWest.lat + (northEast.lat - southWest.lat) * 0.8, 
+         southWest.lng + (northEast.lng - southWest.lng) * 0.8]
+      ], {
+        color: '#44AF69',
+        fillColor: '#44AF69',
+        fillOpacity: 0.7,
+        weight: 1
+      }).addTo(map);
+      
+      // Add some random patches to simulate more complex patterns
+      for (let i = 0; i < 20; i++) {
+        const lat = southWest.lat + Math.random() * (northEast.lat - southWest.lat);
+        const lng = southWest.lng + Math.random() * (northEast.lng - southWest.lng);
+        const size = 0.02 + Math.random() * 0.05;
+        
+        L.rectangle([
+          [lat - size, lng - size],
+          [lat + size, lng + size]
+        ], {
+          color: '#44AF69',
+          fillColor: '#44AF69',
+          fillOpacity: 0.7,
+          weight: 1
+        }).addTo(map);
+      }
+      
+      // Add some non-forest areas
+      for (let i = 0; i < 10; i++) {
+        const lat = southWest.lat + Math.random() * (northEast.lat - southWest.lat);
+        const lng = southWest.lng + Math.random() * (northEast.lng - southWest.lng);
+        const size = 0.03 + Math.random() * 0.08;
+        
+        L.rectangle([
+          [lat - size, lng - size],
+          [lat + size, lng + size]
+        ], {
+          color: '#FC3D21',
+          fillColor: '#FC3D21',
+          fillOpacity: 0.7,
+          weight: 1
+        }).addTo(map);
+      }
+    }
+    
+    // Add the classification layer by default
+    addClassificationLayer();
+    
+    // Layer control functionality
+    const layerSwitches = document.querySelectorAll('.layer-switch input');
+    layerSwitches.forEach(switchEl => {
+      switchEl.addEventListener('change', function() {
+        const layerName = this.parentElement.nextElementSibling.textContent;
+        console.log(`${layerName} layer ${this.checked ? 'enabled' : 'disabled'}`);
+        // In a real app, you would toggle the actual map layers here
+      });
+    });
+    
+    // Timeline functionality
+    const timelineHandle = document.querySelector('.timeline-handle');
+    const timelineProgress = document.querySelector('.timeline-progress');
+    const timeline = document.querySelector('.timeline');
+    let isDragging = false;
+    
+    timelineHandle.addEventListener('mousedown', () => {
+      isDragging = true;
+      document.addEventListener('mousemove', moveHandle);
+      document.addEventListener('mouseup', stopDrag);
+    });
+    
+    timeline.addEventListener('click', (e) => {
+      const rect = timeline.getBoundingClientRect();
+      const percent = (e.clientX - rect.left) / rect.width;
+      updateTimeline(percent);
+    });
+    
+    function moveHandle(e) {
+      if (!isDragging) return;
+      
+      const rect = timeline.getBoundingClientRect();
+      let percent = (e.clientX - rect.left) / rect.width;
+      percent = Math.max(0, Math.min(1, percent));
+      updateTimeline(percent);
+    }
+    
+    function stopDrag() {
+      isDragging = false;
+      document.removeEventListener('mousemove', moveHandle);
+      document.removeEventListener('mouseup', stopDrag);
+    }
+    
+    function updateTimeline(percent) {
+      timelineHandle.style.left = `${percent * 100}%`;
+      timelineProgress.style.width = `${percent * 100}%`;
+      
+      // In a real app, you would update the map to show data for the selected time
+      const year = 2022 + Math.round(percent * 3);
+      console.log(`Showing data for year ${year}`);
+    }
+    
+    // Export functionality
+    document.getElementById('export-data').addEventListener('click', function() {
+      const spinner = document.getElementById('export-spinner');
+      const button = this;
+      
+      spinner.style.display = 'inline-block';
+      button.disabled = true;
+      
+      // Simulate export process
+      setTimeout(() => {
+        spinner.style.display = 'none';
+        button.disabled = false;
+        alert('Data exported successfully!');
+      }, 2000);
+    });
+    
+    document.getElementById('export-image').addEventListener('click', function() {
+      alert('Image export started. This may take a moment...');
+      // In a real app, you would capture the map view and initiate download
+    });
+    
+    // Responsive navigation for mobile
+    const navToggle = document.createElement('button');
+    navToggle.innerHTML = '☰';
+    navToggle.style.background = 'transparent';
+    navToggle.style.border = 'none';
+    navToggle.style.color = 'white';
+    navToggle.style.fontSize = '1.5rem';
+    navToggle.style.cursor = 'pointer';
+    navToggle.style.display = 'none';
+    navToggle.style.position = 'absolute';
+    navToggle.style.right = '1rem';
+    navToggle.style.top = '1rem';
+    
+    const nav = document.querySelector('nav');
+    document.querySelector('header').appendChild(navToggle);
+    
+    navToggle.addEventListener('click', () => {
+      nav.style.display = nav.style.display === 'none' ? 'block' : 'none';
+    });
+    
+    function checkScreenSize() {
+      if (window.innerWidth <= 768) {
+        navToggle.style.display = 'block';
+        nav.style.display = 'none';
+      } else {
+        navToggle.style.display = 'none';
+        nav.style.display = 'block';
+      }
+    }
+    
+    window.addEventListener('resize', checkScreenSize);
+    checkScreenSize();
+    
+    // Add active class to current navigation link
+    const navLinks = document.querySelectorAll('nav a');
+    navLinks.forEach(link => {
+      if (link.href === window.location.href) {
+        link.classList.add('active');
+      }
+    });
+    
+    // Animation on scroll
+    const observerOptions = {
+      threshold: 0.1
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('fade-in');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+    
+    document.querySelectorAll('.fade-in').forEach(element => {
+      observer.observe(element);
+    });
+    
+    // Add click effect to all buttons
+    document.querySelectorAll('button').forEach(button => {
+      button.addEventListener('mousedown', () => {
+        button.style.transform = 'scale(0.95)';
+      });
+      
+      button.addEventListener('mouseup', () => {
+        button.style.transform = 'scale(1)';
+      });
+      
+      button.addEventListener('mouseleave', () => {
+        button.style.transform = 'scale(1)';
+      });
+    });
+  </script>
+</body>
+</html>

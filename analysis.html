@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forest Classification Analysis</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+    
+    :root {
+      --space-blue: #0B3D91;
+      --earth-green: #44AF69;
+      --cosmic-black: #101820;
+      --nasa-gold: #FFD700;
+      --alert-red: #FC3D21;
+      --text-white: #FFFFFF;
+      --light-blue: #A7D5F2;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--cosmic-black);
+      color: var(--text-white);
+      overflow-x: hidden;
+    }
+    
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+    
+    .stars::before {
+      content: '';
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: white;
+      box-shadow: 0 0 10px 2px rgba(255,255,255,0.7);
+      border-radius: 50%;
+      animation: twinkle 4s infinite;
+    }
+    
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+    }
+    
+    @keyframes twinkle {
+      0% { opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { opacity: 0.3; }
+    }
+    
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem 3rem;
+      background: rgba(11, 61, 145, 0.9);
+      backdrop-filter: blur(10px);
+      position: fixed;
+      width: 100%;
+      z-index: 100;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .logo-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: conic-gradient(var(--nasa-gold), var(--alert-red), var(--nasa-gold));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: rotate 20s linear infinite;
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .logo-inner {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--space-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-white);
+      font-weight: bold;
+      font-size: 14px;
+    }
+    
+    .logo h1 {
+      font-size: 1.2rem;
+      font-weight: 500;
+      letter-spacing: 1px;
+    }
+    
+    nav ul {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+    
+    nav a {
+      color: var(--text-white);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      padding: 0.5rem 0;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--nasa-gold);
+      transition: width 0.3s ease;
+    }
+    
+    nav a:hover {
+      color: var(--nasa-gold);
+    }
+    
+    nav a:hover::after {
+      width: 100%;
+    }
+    
+    .analysis-container {
+      padding: 8rem 3rem 3rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .section-title {
+      text-align: center;
+      margin-bottom: 3rem;
+      font-size: 2rem;
+      position: relative;
+      display: inline-block;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 25%;
+      width: 50%;
+      height: 3px;
+      background: var(--nasa-gold);
+    }
+    
+    .analysis-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 3rem;
+    }
+    
+    .analysis-card {
+      background: rgba(16, 24, 32, 0.7);
+      border-radius: 8px;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .analysis-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      border-color: var(--nasa-gold);
+    }
+    
+    .analysis-card-title {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      color: var(--nasa-gold);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .analysis-card-icon {
+      width: 30px;
+      height: 30px;
+      background: var(--space-blue);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+    
+    .analysis-image {
+      width: 100%;
+      height: 300px;
+      background-color: #000;
+      background-size: cover;
+      background-position: center;
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .scan-line {
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(to right, transparent, var(--nasa-gold), transparent);
+      animation: scan 3s linear infinite;
+      z-index: 3;
+    }
+    
+    @keyframes scan {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+    
+    .analysis-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .stat-item {
+      background: rgba(11, 61, 145, 0.3);
+      padding: 0.8rem;
+      border-radius: 4px;
+      border-left: 3px solid var(--nasa-gold);
+    }
+    
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--light-blue);
+      margin-bottom: 0.3rem;
+    }
+    
+    .stat-value {
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+    
+    .analysis-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .control-button {
+      padding: 0.8rem 1.5rem;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .control-primary {
+      background: var(--space-blue);
+      color: var(--text-white);
+      border: 1px solid var(--nasa-gold);
+    }
+    
+    .control-secondary {
+      background: transparent;
+      color: var(--text-white);
+      border: 1px solid var(--light-blue);
+    }
+    
+    .control-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .control-primary:hover {
+      box-shadow: 0 0 15px var(--nasa-gold);
+    }
+    
+    .control-secondary:hover {
+      box-shadow: 0 0 15px var(--light-blue);
+    }
+    
+    .analysis-tabs {
+      display: flex;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      margin-bottom: 2rem;
+    }
+    
+    .tab-button {
+      padding: 0.8rem 1.5rem;
+      background: transparent;
+      border: none;
+      color: var(--light-blue);
+      font-weight: 500;
+      cursor: pointer;
+      position: relative;
+    }
+    
+    .tab-button.active {
+      color: var(--nasa-gold);
+    }
+    
+    .tab-button.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--nasa-gold);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .legend {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+    }
+    
+    .legend-color {
+      width: 15px;
+      height: 15px;
+      border-radius: 3px;
+    }
+    
+    .color-forest {
+      background: var(--earth-green);
+    }
+    
+    .color-nonforest {
+      background: var(--alert-red);
+    }
+    
+    .color-density-1 { background: #00441b; }
+    .color-density-2 { background: #006d2c; }
+    .color-density-3 { background: #238b45; }
+    .color-density-4 { background: #41ab5d; }
+    .color-density-5 { background: #74c476; }
+    .color-density-6 { background: #a1d99b; }
+    .color-density-7 { background: #c7e9c0; }
+    .color-density-8 { background: #e5f5e0; }
+    
+    .color-uncertainty-1 { background: #67000d; }
+    .color-uncertainty-2 { background: #a50f15; }
+    .color-uncertainty-3 { background: #cb181d; }
+    .color-uncertainty-4 { background: #ef3b2c; }
+    .color-uncertainty-5 { background: #fb6a4a; }
+    .color-uncertainty-6 { background: #fc9272; }
+    .color-uncertainty-7 { background: #fcbba1; }
+    .color-uncertainty-8 { background: #fee5d9; }
+    
+    .analysis-details {
+      margin-top: 2rem;
+      background: rgba(16, 24, 32, 0.7);
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .details-title {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--nasa-gold);
+    }
+    
+    .details-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    
+    .details-item {
+      margin-bottom: 1rem;
+    }
+    
+    .details-label {
+      font-size: 0.8rem;
+      color: var(--light-blue);
+      margin-bottom: 0.3rem;
+    }
+    
+    .details-value {
+      font-size: 0.9rem;
+      word-break: break-all;
+    }
+    
+    footer {
+      background: var(--space-blue);
+      padding: 3rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .footer-orbit {
+      position: absolute;
+      width: 1200px;
+      height: 1200px;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    
+    .footer-content {
+      position: relative;
+      z-index: 10;
+    }
+    
+    .footer-logo {
+      margin-bottom: 2rem;
+    }
+    
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .footer-link {
+      color: var(--light-blue);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.3s ease;
+    }
+    
+    .footer-link:hover {
+      color: var(--nasa-gold);
+    }
+    
+    .footer-credit {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.5);
+    }
+    
+    @media (max-width: 768px) {
+      header {
+        padding: 1rem;
+      }
+      
+      .logo h1 {
+        font-size: 1rem;
+      }
+      
+      nav ul {
+        gap: 1rem;
+      }
+      
+      .analysis-container {
+        padding: 6rem 1rem 2rem;
+      }
+      
+      .analysis-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .details-content {
+        grid-template-columns: 1fr;
+      }
+      
+      .analysis-controls {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .control-button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+    
+    /* Animation classes */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.6s ease forwards;
+    }
+    
+    .delay-1 { animation-delay: 0.2s; }
+    .delay-2 { animation-delay: 0.4s; }
+    .delay-3 { animation-delay: 0.6s; }
+    .delay-4 { animation-delay: 0.8s; }
+    
+    /* Spinner styles */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: var(--nasa-gold);
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Progress bar */
+    .progress-container {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      margin: 1rem 0;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(to right, var(--space-blue), var(--nasa-gold));
+      width: 0;
+      transition: width 0.3s ease;
+      border-radius: 3px;
+    }
+    .logo-container{
+         height: 20px;  /* Super small size (adjust as needed) */
+         width: auto;   /* Preserves proportions */
+  opacity: 0.9;  /* Optional: Slight transparency */
+    }
+  </style>
+</head>
+<body>
+  <div class="stars" id="stars"></div>
+  
+  <header>
+    <div class="logo">
+      <div class="logo-container" style="height: 30px; width: auto; opacity: 0.9;">
+        <img src="logo.png" alt="Algerian Space Logo" class="nav-logo" style="height: 100%; width: auto;">
+      </div>
+      <h1>FOREST CLASSIFIER</h1>
+    </div>
+    
+    <nav>
+      <ul>
+        <li><a href="animatedhomepage.html">Home</a></li>
+        <li><a href="upload.html">Upload</a></li>
+        <li><a href="analysis.html" class="active">Analysis</a></li>
+        <li><a href="visualization.html">Results</a></li>
+      </ul>
+    </nav>
+  </header>
+  
+  <main class="analysis-container">
+    <h1 class="section-title">Analysis Dashboard</h1>
+    
+    <div class="analysis-tabs">
+      <button class="tab-button active" data-tab="classification">Classification</button>
+      <button class="tab-button" data-tab="density">Density Analysis</button>
+      <button class="tab-button" data-tab="uncertainty">Uncertainty</button>
+    </div>
+    
+    <div class="tab-content active" id="classification-tab">
+      <div class="analysis-grid">
+        <div class="analysis-card fade-in">
+          <div class="analysis-card-title">
+            <div class="analysis-card-icon">1</div>
+            Binary Classification
+          </div>
+          <div class="analysis-image" id="classification-image" style="background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&auto=format&fit=crop');">
+            <div class="scan-line"></div>
+          </div>
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-color color-forest"></div>
+              <span>Forest</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-nonforest"></div>
+              <span>Non-Forest</span>
+            </div>
+          </div>
+          <div class="analysis-stats">
+            <div class="stat-item">
+              <div class="stat-label">Forest Area</div>
+              <div class="stat-value">64.2%</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Accuracy</div>
+              <div class="stat-value">92.7%</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Precision</div>
+              <div class="stat-value">89.4%</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Recall</div>
+              <div class="stat-value">94.1%</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="analysis-card fade-in delay-1">
+          <div class="analysis-card-title">
+            <div class="analysis-card-icon">2</div>
+            Classification Details
+          </div>
+          <div class="analysis-details">
+            <div class="details-content">
+              <div class="details-item">
+                <div class="details-label">Model Used</div>
+                <div class="details-value">Random Forest Classifier</div>
+              </div>
+              <div class="details-item">
+                <div class="details-label">Training Data</div>
+                <div class="details-value">Landsat 8 (30m resolution)</div>
+              </div>
+              <div class="details-item">
+                <div class="details-label">Features</div>
+                <div class="details-value">NDVI, NDWI, NDBI, Bands 2-7</div>
+              </div>
+              <div class="details-item">
+                <div class="details-label">Processing Time</div>
+                <div class="details-value">2.4 seconds</div>
+              </div>
+              <div class="details-item">
+                <div class="details-label">Date Processed</div>
+                <div class="details-value">2025-04-12 14:30 UTC</div>
+              </div>
+              <div class="details-item">
+                <div class="details-label">Image Size</div>
+                <div class="details-value">2048 × 2048 pixels</div>
+              </div>
+            </div>
+          </div>
+          <div class="analysis-controls">
+            <button class="control-button control-primary" id="export-classification">
+              <span class="spinner" id="export-spinner" style="display: none;"></span>
+              Export Results
+            </button>
+            <button class="control-button control-secondary" id="compare-classification">
+              Compare with Previous
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="tab-content" id="density-tab">
+      <div class="analysis-grid">
+        <div class="analysis-card">
+          <div class="analysis-card-title">
+            <div class="analysis-card-icon">1</div>
+            Forest Density Analysis
+          </div>
+          <div class="analysis-image" id="density-image" style="background-image: url('https://images.unsplash.com/photo-1425913397330-cf8af2ff40a1?w=800&auto=format&fit=crop');">
+            <div class="scan-line"></div>
+          </div>
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-color color-density-1"></div>
+              <span>0-10%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-density-2"></div>
+              <span>10-20%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-density-3"></div>
+              <span>20-30%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-density-4"></div>
+              <span>30-40%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-density-5"></div>
+              <span>40-50%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-density-6"></div>
+              <span>50-60%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-density-7"></div>
+              <span>60-70%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-density-8"></div>
+              <span>70-100%</span>
+            </div>
+          </div>
+          <div class="analysis-stats">
+            <div class="stat-item">
+              <div class="stat-label">Mean Density</div>
+              <div class="stat-value">42.6%</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Median Density</div>
+              <div class="stat-value">38.2%</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Dense Forest (>70%)</div>
+              <div class="stat-value">18.4%</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Sparse Forest (<30%)</div>
+              <div class="stat-value">27.9%</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="analysis-card">
+          <div class="analysis-card-title">
+            <div class="analysis-card-icon">2</div>
+            Density Analysis Details
+          </div>
+          <div class="analysis-details">
+            <div class="details-content">
+              <div class="details-item">
+                <div class="details-label">Model Used</div>
+                <div class="details-value">Linear Spectral Unmixing</div>
+              </div>
+              <div class="details-item">
+                <div class="details-label">Endmembers</div>
+                <div class="details-value">3 (Forest, Soil, Water)</div>
+              </div>
+              <div class="details-item">
+                <div class="details-label">RMSE</div>
+                <div class="details-value">0.042</div>
+              </div>
+              <div class="details-item">
+                <div class="details-label">Processing Time</div>
+                <div class="details-value">4.7 seconds</div>
+              </div>
+              <div class="details-item">
+                <div class="details-label">Date Processed</div>
+                <div class="details-value">2025-04-12 14:31 UTC</div>
+              </div>
+              <div class="details-item">
+                <div class="details-label">Resolution</div>
+                <div class="details-value">30m per pixel</div>
+              </div>
+            </div>
+          </div>
+          <div class="analysis-controls">
+            <button class="control-button control-primary" id="export-density">
+              Export Results
+            </button>
+            <button class="control-button control-secondary" id="compare-density">
+              Compare with Classification
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="tab-content" id="uncertainty-tab">
+      <div class="analysis-grid">
+        <div class="analysis-card">
+          <div class="analysis-card-title">
+            <div class="analysis-card-icon">1</div>
+            Classification Uncertainty
+          </div>
+          <div class="analysis-image" id="uncertainty-image" style="background-image: url('https://images.unsplash.com/photo-1476231682828-37e571bc172f?w=800&auto=format&fit=crop');">
+            <div class="scan-line"></div>
+          </div>
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-color color-uncertainty-1"></div>
+              <span>0-10%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-uncertainty-2"></div>
+              <span>10-20%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-uncertainty-3"></div>
+              <span>20-30%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-uncertainty-4"></div>
+              <span>30-40%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-uncertainty-5"></div>
+              <span>40-50%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-uncertainty-6"></div>
+              <span>50-60%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-uncertainty-7"></div>
+              <span>60-70%</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-color color-uncertainty-8"></div>
+              <span>70-100%</span>
+            </div>
+          </div>
+          <div class="analysis-stats">
+            <div class="stat-item">
+              <div class="stat-label">Mean Uncertainty</div>
+              <div class="stat-value">22.4%</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">High Uncertainty (>50%)</div>
+              <div class="stat-value">8.7%</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Low Uncertainty (<10%)</div>
+              <div class="stat-value">41.2%</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">Correlation with Density</div>
+              <div class="stat-value">-0.63</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="analysis-card">
+          <div class="analysis-card-title">
+            <div class="analysis-card-icon">2</div>
+            Uncertainty Analysis Details
+          </div>
+          <div class="analysis-details">
+            <div class="details-content">
+              <div class="details-item">
+                <div class="details-label">Method</div>
+                <div class="details-value">Probability Entropy</div>
+              </div>
+              <div class="details-item">
+                <div class="details-label">Source</div>
+                <div class="details-value">Classifier Probability Output</div>
+              </div>
+              <div class="details-item">
+                <div class="details-label">Range</div>
+                <div class="details-value">0% (certain) to 100% (uncertain)</div>
+              </div>
+              <div class="details-item">
+                <div class="details-label">Processing Time</div>
+                <div class="details-value">1.2 seconds</div>
+              </div>
+              <div class="details-item">
+                <div class="details-label">Date Processed</div>
+                <div class="details-value">2025-04-12 14:32 UTC</div>
+              </div>
+              <div class="details-item">
+                <div class="details-label">High Uncertainty Areas</div>
+                <div class="details-value">Mostly transition zones</div>
+              </div>
+            </div>
+          </div>
+          <div class="analysis-controls">
+            <button class="control-button control-primary" id="export-uncertainty">
+              Export Results
+            </button>
+            <button class="control-button control-secondary" id="compare-uncertainty">
+              View Uncertainty Hotspots
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <footer>
+    <div class="footer-orbit"></div>
+    
+    <div class="logo-container" style="height: 30px; width: auto; opacity: 0.9;">
+      <img src="logo.png" alt="Algerian Space Logo" class="nav-logo" style="height: 100%; width: auto;">
+    </div>
+      
+      <div class="footer-links">
+        <a href="#" class="footer-link">Privacy Policy</a>
+        <a href="#" class="footer-link">Terms of Use</a>
+        <a href="#" class="footer-link">Contact</a>
+        <a href="#" class="footer-link">Documentation</a>
+      </div>
+      
+      <p class="footer-credit"> 2025 Algerian Space Agency. All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Create stars
+    const starsContainer = document.getElementById('stars');
+    
+    function createStars(count) {
+      for (let i = 0; i < count; i++) {
+        const star = document.createElement('div');
+        star.classList.add('star');
+        
+        // Random position
+        const x = Math.floor(Math.random() * window.innerWidth);
+        const y = Math.floor(Math.random() * window.innerHeight);
+        
+        star.style.left = `${x}px`;
+        star.style.top = `${y}px`;
+        
+        // Random size
+        const size = Math.random() * 2;
+        star.style.width = `${size}px`;
+        star.style.height = `${size}px`;
+        
+        // Random opacity
+        const opacity = Math.random() * 0.8 + 0.2;
+        star.style.opacity = opacity;
+        
+        // Random animation delay
+        const delay = Math.random() * 5;
+        star.style.animation = `twinkle 4s ${delay}s infinite`;
+        
+        starsContainer.appendChild(star);
+      }
+    }
+    
+    createStars(150);
+    
+    // Tab functionality
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        // Remove active class from all buttons and contents
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+        
+        // Add active class to clicked button and corresponding content
+        button.classList.add('active');
+        const tabId = button.getAttribute('data-tab');
+        document.getElementById(`${tabId}-tab`).classList.add('active');
+      });
+    });
+    
+    // Export button functionality
+    document.getElementById('export-classification').addEventListener('click', function() {
+      const spinner = document.getElementById('export-spinner');
+      const button = this;
+      
+      spinner.style.display = 'inline-block';
+      button.disabled = true;
+      
+      // Simulate export process
+      setTimeout(() => {
+        spinner.style.display = 'none';
+        button.disabled = false;
+        alert('Classification results exported successfully!');
+      }, 2000);
+    });
+    
+    // Other export buttons
+    document.getElementById('export-density').addEventListener('click', function() {
+      alert('Density analysis results exported successfully!');
+    });
+    
+    document.getElementById('export-uncertainty').addEventListener('click', function() {
+      alert('Uncertainty analysis results exported successfully!');
+    });
+    
+    // Compare buttons
+    document.getElementById('compare-classification').addEventListener('click', function() {
+      alert('Opening comparison view with previous analysis...');
+    });
+    
+    document.getElementById('compare-density').addEventListener('click', function() {
+      alert('Opening comparison view with classification results...');
+    });
+    
+    document.getElementById('compare-uncertainty').addEventListener('click', function() {
+      alert('Displaying uncertainty hotspots on map...');
+    });
+    
+    // Animation on scroll
+    const observerOptions = {
+      threshold: 0.1
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('fade-in');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+    
+    document.querySelectorAll('.analysis-card').forEach(card => {
+      observer.observe(card);
+    });
+    
+    // Responsive navigation for mobile
+    const navToggle = document.createElement('button');
+    navToggle.innerHTML = '☰';
+    navToggle.style.background = 'transparent';
+    navToggle.style.border = 'none';
+    navToggle.style.color = 'white';
+    navToggle.style.fontSize = '1.5rem';
+    navToggle.style.cursor = 'pointer';
+    navToggle.style.display = 'none';
+    navToggle.style.position = 'absolute';
+    navToggle.style.right = '1rem';
+    navToggle.style.top = '1rem';
+    
+    const nav = document.querySelector('nav');
+    document.querySelector('header').appendChild(navToggle);
+    
+    navToggle.addEventListener('click', () => {
+      nav.style.display = nav.style.display === 'none' ? 'block' : 'none';
+    });
+    
+    function checkScreenSize() {
+      if (window.innerWidth <= 768) {
+        navToggle.style.display = 'block';
+        nav.style.display = 'none';
+      } else {
+        navToggle.style.display = 'none';
+        nav.style.display = 'block';
+      }
+    }
+    
+    window.addEventListener('resize', checkScreenSize);
+    checkScreenSize();
+    
+    // Add active class to current navigation link
+    const navLinks = document.querySelectorAll('nav a');
+    navLinks.forEach(link => {
+      if (link.href === window.location.href) {
+        link.classList.add('active');
+      }
+    });
+    
+    // Simulate loading progress for images
+    function simulateLoading(imageElement) {
+      const progressContainer = document.createElement('div');
+      progressContainer.className = 'progress-container';
+      const progressBar = document.createElement('div');
+      progressBar.className = 'progress-bar';
+      progressContainer.appendChild(progressBar);
+      imageElement.parentNode.insertBefore(progressContainer, imageElement);
+      
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 10;
+        progressBar.style.width = `${Math.min(progress, 100)}%`;
+        
+        if (progress >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            progressContainer.style.opacity = '0';
+            setTimeout(() => {
+              progressContainer.remove();
+            }, 300);
+          }, 300);
+        }
+      }, 100);
+    }
+    
+    // Simulate loading for all analysis images
+    document.querySelectorAll('.analysis-image').forEach(image => {
+      simulateLoading(image);
+    });
+    
+    // Add click effect to all buttons
+    document.querySelectorAll('button').forEach(button => {
+      button.addEventListener('mousedown', () => {
+        button.style.transform = 'scale(0.95)';
+      });
+      
+      button.addEventListener('mouseup', () => {
+        button.style.transform = 'scale(1)';
+      });
+      
+      button.addEventListener('mouseleave', () => {
+        button.style.transform = 'scale(1)';
+      });
+    });
+  </script>
+</body>
+</html>
