@@ -767,7 +767,7 @@
     <nav>
       <ul>
         <li><a href="animatedhomepage.html" class="active">Home</a></li>
-        <li><a href="upload.html">Upload</a></li>
+        <li><a href="upload.html" >Upload</a></li>
         <li><a href="analysis.html">Analysis</a></li>
         <li><a href="visualization.html">Results</a></li>
       </ul>
@@ -1115,28 +1115,30 @@
     window.addEventListener('resize', checkScreenSize);
     checkScreenSize();
 
-    // Add smooth scrolling for navigation links
-    document.querySelectorAll('nav a').forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const targetId = link.getAttribute('href');
-        if (targetId && targetId !== '#') {
-          const targetSection = document.querySelector(targetId);
-          if (targetSection) {
-            window.scrollTo({
-              top: targetSection.offsetTop - 80,
-              behavior: 'smooth'
-            });
-            
-            // Close mobile menu if open
-            if (window.innerWidth <= 768) {
-              nav.style.display = 'none';
-            }
-          }
-        }
-      });
-    });
 
+// Add smooth scrolling for navigation links
+document.querySelectorAll('nav a').forEach(link => {
+  link.addEventListener('click', (e) => {
+    const targetId = link.getAttribute('href');
+    // Only apply smooth scrolling to in-page links (those starting with #)
+    if (targetId && targetId.startsWith('#')) {
+      e.preventDefault();
+      const targetSection = document.querySelector(targetId);
+      if (targetSection) {
+        window.scrollTo({
+          top: targetSection.offsetTop - 80,
+          behavior: 'smooth'
+        });
+        
+        // Close mobile menu if open
+        if (window.innerWidth <= 768) {
+          nav.style.display = 'none';
+        }
+      }
+    }
+    // Let normal navigation happen for links to other pages
+  });
+});
     // Add active class to current section in navigation
     const sections = document.querySelectorAll('section');
     window.addEventListener('scroll', () => {
@@ -1165,13 +1167,13 @@
     document.querySelector('.workflow').id = 'workflow';
     document.querySelector('.showcase').id = 'showcase';
 
-    // Update navigation links to point to sections
-    document.querySelectorAll('nav a').forEach((link, index) => {
-      const sections = ['home', 'upload', 'features', 'showcase', 'about'];
-      if (index < sections.length) {
-        link.setAttribute('href', `#${sections[index]}`);
-      }
-    });
+    // // Update navigation links to point to sections
+    // document.querySelectorAll('nav a').forEach((link, index) => {
+    //   const sections = ['home', 'upload', 'features', 'showcase', 'about'];
+    //   if (index < sections.length) {
+    //     link.setAttribute('href', `#${sections[index]}`);
+    //   }
+    // });
 
     // Add hover effect to feature cards
     document.querySelectorAll('.feature-card').forEach(card => {
